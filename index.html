@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseAI Dashboard</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <i data-lucide="zap"></i> PulseAI
+        </div>
+        <div class="nav-controls">
+            <div class="status-badge">
+                <span class="pulsing-indicator"></span>
+                Team Status: Moderate Risk
+            </div>
+            <button id="upload-btn" class="btn btn-primary">
+                <i data-lucide="upload"></i> Upload Standup Notes
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-container">
+        <!-- Left Column: Analytics & Risk -->
+        <section class="left-column">
+            <!-- Top Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 class="stat-title">Overall Team Morale</h3>
+                    <div class="stat-value" id="morale-val">78%</div>
+                    <div class="stat-sub positive"><i data-lucide="trending-up"></i> +4% vs last week</div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="stat-title">Burnout Risk Level</h3>
+                    <div class="stat-value warning">Medium</div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="stat-title">Communication Clarity</h3>
+                    <div class="stat-value">92%</div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="stat-title">Active Friction Alerts</h3>
+                    <div class="stat-value">3 Issues</div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>Weekly Morale vs. Workload Strain</h3>
+                    <div class="chart-container">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- AI Risk Engine -->
+            <div class="risk-engine">
+                <h2>AI Risk Engine & Alerts</h2>
+                <div class="risk-list" id="risk-list">
+                    <!-- Cards will be populated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column -->
+        <section class="right-column">
+             <div class="chart-card">
+                <h3>Workload Distribution Across Teams</h3>
+                <div class="chart-container">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Meeting Scheduling Calendar -->
+            <div class="chart-card meeting-calendar-widget">
+                <div class="calendar-header">
+                    <button id="prev-month" class="btn-icon"><i data-lucide="chevron-left"></i></button>
+                    <h3 id="calendar-month-year">May 2024</h3>
+                    <button id="next-month" class="btn-icon"><i data-lucide="chevron-right"></i></button>
+                </div>
+                
+                <div class="calendar-grid-header">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                </div>
+                <div id="calendar-days" class="calendar-days">
+                    <!-- Populated by JS -->
+                </div>
+
+                <div class="calendar-details">
+                    <h4 id="selected-date-display">Selected Date</h4>
+                    <ul id="meeting-list" class="meeting-list">
+                        <!-- Populated by JS -->
+                    </ul>
+                    
+                    <form id="add-meeting-form" class="add-meeting-form">
+                        <input type="time" id="meeting-time" required>
+                        <input type="text" id="meeting-title" placeholder="Meeting Title" required>
+                        <input type="text" id="meeting-attendees" placeholder="Attendees">
+                        <button type="submit" class="btn btn-primary btn-sm"><i data-lucide="plus"></i> Add</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Employee Team Stress Dashboard Section -->
+    <section class="stress-dashboard-container">
+        <h2 class="section-title"><i data-lucide="users"></i> Employee Team Stress Dashboard</h2>
+        
+        <!-- Spotlight: Most Stressed Team -->
+        <div id="most-stressed-spotlight" class="most-stressed-card">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Grid of all teams -->
+        <div class="teams-grid" id="teams-grid">
+            <!-- Populated by JS -->
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <!-- Team Detail Modal -->
+    <div id="team-detail-modal" class="modal-overlay hidden">
+        <div class="modal-content team-modal-content">
+            <div class="modal-header">
+                <h2 id="team-detail-title">Team Details</h2>
+                <button class="close-btn" id="close-team-detail">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="team-detail-layout">
+                    <div class="team-detail-info">
+                        <h3>Members</h3>
+                        <ul id="team-members-list" class="members-list"></ul>
+                        
+                        <h3>Feedback</h3>
+                        <p id="team-feedback-text" class="text-muted"></p>
+
+                        <h3>Suggestions</h3>
+                        <ul id="team-suggestions-list" class="suggestions-list text-muted"></ul>
+                    </div>
+                    <div class="team-detail-chart">
+                        <h3>Stress Trends (Last 6 Weeks)</h3>
+                        <div class="chart-container">
+                            <canvas id="teamStressChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Upload Notes Modal -->
+    <div id="upload-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Standup Notes</h2>
+                <button class="close-btn" id="close-upload">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="notes-textarea" placeholder="Paste standup notes or meeting transcripts here..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-upload">Cancel</button>
+                <button class="btn btn-primary" id="analyze-notes">Analyze Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Plan Modal -->
+    <div id="action-plan-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI Generated Action Plan</h2>
+                <button class="close-btn" id="close-action-plan">&times;</button>
+            </div>
+            <div class="modal-body" id="action-plan-body">
+                <!-- Content populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Workload Tracker (Bottom Right) -->
+    <div id="workload-tracker-widget" class="workload-tracker-widget">
+        <div class="tracker-header">
+            <h3><i data-lucide="calendar"></i> Workload Tracker</h3>
+        </div>
+        <div class="tracker-controls">
+            <select id="month-select" class="tracker-select">
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+            <select id="week-select" class="tracker-select">
+                <option value="Week 1">Week 1</option>
+                <option value="Week 2">Week 2</option>
+                <option value="Week 3">Week 3</option>
+                <option value="Week 4">Week 4</option>
+            </select>
+        </div>
+        <div class="tracker-chart-container">
+            <canvas id="workloadTrackerChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Pulse Advisor Copilot Chat Drawer (Moved to Bottom Left) -->
+    <button id="copilot-toggle" class="copilot-toggle-btn">
+        <i data-lucide="message-square"></i> Pulse Advisor
+    </button>
+    <div id="chat-drawer" class="chat-drawer hidden">
+        <div class="chat-header">
+            <h3><i data-lucide="bot"></i> Pulse Advisor</h3>
+            <button class="close-chat" id="close-chat"><i data-lucide="x"></i></button>
+        </div>
+        <div class="chat-quick-replies">
+            <button class="quick-reply">Draft 1-on-1 Agenda</button>
+            <button class="quick-reply">Analyze Sprint 4 Friction</button>
+            <button class="quick-reply">Generate Check-in Email</button>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <!-- Chat messages -->
+            <div class="chat-message bot-msg">
+                Hello! I'm Pulse Advisor. How can I help you manage team dynamics today?
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Ask Pulse Advisor...">
+            <button id="send-chat" class="btn btn-primary"><i data-lucide="send"></i></button>
+        </div>
+    </div>
+
+    <script src="mockData.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
